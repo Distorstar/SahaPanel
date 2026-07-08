@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
+import { pingPresence } from "@/app/actions";
 import { Field, buttonClass, inputClass, labelClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,7 @@ export function LoginForm() {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
       setLoading(false);
@@ -37,12 +38,7 @@ export function LoginForm() {
       return;
     }
 
-    if (data.user) {
-      await supabase
-        .from("profiles")
-        .update({ is_online: true, last_seen_at: new Date().toISOString() })
-        .eq("id", data.user.id);
-    }
+    await pingPresence();
 
     router.replace("/dashboard");
     router.refresh();
