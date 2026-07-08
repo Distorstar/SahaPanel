@@ -1,12 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
-import { pingPresence } from "@/app/actions";
 import { Field, buttonClass, inputClass, labelClass, secondaryButtonClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
+
+// Auth katmanindan gelen hatayi kullaniciya uygun mesaja cevir.
+function describeSignInError(message: string | undefined): string {
+  const m = (message ?? "").toLowerCase();
+  // E-posta dogrulanmamis: bu panelde giris, yetkili onayindan sonra acilir.
+  if (m.includes("not confirmed") || m.includes("email not confirmed")) {
+    return "Girişiniz henüz etkin değil. Kaydınız yetkili tarafından onaylandıktan sonra tekrar deneyin.";
+  }
+  return "E-posta veya şifre hatalı.";
+}
 
 function Spinner() {
   return (
@@ -18,7 +26,6 @@ function Spinner() {
 }
 
 export function LoginForm({ onBack }: { onBack?: () => void }) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -34,14 +41,16 @@ export function LoginForm({ onBack }: { onBack?: () => void }) {
 
     if (signInError) {
       setLoading(false);
-      setError("E-posta veya şifre hatalı.");
+      setError(describeSignInError(signInError.message));
       return;
     }
 
-    await pingPresence();
-
-    router.replace("/dashboard");
-    router.refresh();
+    // Tam sayfa yönlendirme kullanıyoruz: taze oturum çerezi üst düzey istekle
+    // birlikte sunucuya gider; proxy (middleware) oturumu görüp bizi panele alır.
+    // Önceki router.replace()+router.refresh() akışı, çerez yazımı ile RSC
+    // getirmesi yarıştığı için "girişe takılı kalma / yenilemeden geçmeme"
+    // sorununa yol açıyordu. Çevrimiçi durumu paneldeki PresenceHeartbeat tazeler.
+    window.location.assign("/dashboard");
   }
 
   return (

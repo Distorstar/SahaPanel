@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import {
   canManageAdmin,
   canManageOperations,
@@ -513,6 +514,23 @@ async function verifyRegistrationStatus(
   return null;
 }
 
+// Onaylanan kullanicinin e-postasini "dogrulanmis" isaretle.
+//
+// Supabase'de e-posta dogrulamasi acik oldugunda, self-servis kaydolan personel
+// e-postasini onaylamadigi surece Auth katmani girisi reddeder ve kullaniciya
+// (jenerik olarak) "sifre hatali" gorunur. Bu panelde asil kapi YETKILI onayidir;
+// bu yuzden onayla birlikte kullanicinin e-postasini dogrulanmis sayarak girisin
+// calismasini garanti ediyoruz. Dogrulama zaten yapilmissa islem etkisizdir.
+//
+// Hata mesaji doner (sorun yoksa null). SUPABASE_SECRET_KEY tanimli degilse
+// sessizce atlar (e-posta dogrulamasi kapali kurulumlar icin gerekmez).
+async function confirmUserEmail(userId: string): Promise<string | null> {
+  const admin = createAdminClient();
+  if (!admin) return null;
+  const { error } = await admin.auth.admin.updateUserById(userId, { email_confirm: true });
+  return error ? describeError(error) : null;
+}
+
 export async function approveRegistration(_: ActionResult, formData: FormData): Promise<ActionResult> {
   const { session, denied } = await ensure("ops");
   if (denied) return denied;
@@ -529,6 +547,16 @@ export async function approveRegistration(_: ActionResult, formData: FormData): 
     if (error) return fail(describeError(error));
     const notApplied = await verifyRegistrationStatus(session, target, "approved");
     if (notApplied) return notApplied;
+
+    // Profil onaylandi; simdi Auth tarafinda girisi acmak icin e-postayi dogrula.
+    const confirmError = await confirmUserEmail(target);
+    if (confirmError) {
+      ["/registrations", "/personnel", "/admin", "/dashboard"].forEach((path) => revalidatePath(path));
+      return ok(
+        "Kayıt onaylandı, ancak e-posta doğrulaması otomatik uygulanamadı; personel giriş yapamayabilir. " +
+          "SUPABASE_SECRET_KEY ortam değişkeninin tanımlı olduğundan emin olun. (" + confirmError + ")"
+      );
+    }
   } catch (error) {
     return fail(describeError(error));
   }
