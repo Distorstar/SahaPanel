@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, LogIn, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/browser";
+import { pingPresence } from "@/app/actions";
 import { Field, buttonClass, inputClass, labelClass } from "@/components/ui";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ export function LoginForm() {
       setError("E-posta veya şifre hatalı.");
       return;
     }
+
+    await pingPresence();
 
     router.replace("/dashboard");
     router.refresh();
