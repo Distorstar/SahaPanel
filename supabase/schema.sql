@@ -546,6 +546,7 @@ begin
       new.role := old.role;
       new.is_active := old.is_active;
       new.department_id := old.department_id;
+      new.registration_status := old.registration_status;
       return new;
     end if;
     -- Mevcut bir admin'in ayricalikli alanlarina dokunamaz.
@@ -553,18 +554,22 @@ begin
       new.role := old.role;
       new.is_active := old.is_active;
       new.department_id := old.department_id;
+      new.registration_status := old.registration_status;
       return new;
     end if;
     -- Kimseyi admin yapamaz.
     if new.role = 'admin' then
       new.role := old.role;
     end if;
+    -- Kayit durumu yalnizca onay/red RPC'leriyle veya admin tarafindan degissin.
+    new.registration_status := old.registration_status;
     return new;
   end if;
 
   new.role := old.role;
   new.is_active := old.is_active;
   new.department_id := old.department_id;
+  new.registration_status := old.registration_status;
   return new;
 end;
 $$;
@@ -871,3 +876,40 @@ alter table public.profiles add column if not exists last_seen_at timestamptz;
 
 create index if not exists profiles_is_online_idx on public.profiles(is_online, last_seen_at);
 grant execute on function public.reject_registration(uuid) to authenticated;
+
+-- Assignees may update only the status of their own tasks. Managers keep full
+-- task editing rights through the existing RLS policy and application UI.
+create or replace function public.guard_task_staff_updates()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.is_manager() then
+    return new;
+  end if;
+
+  if old.assigned_to = auth.uid()
+     and new.title is not distinct from old.title
+     and new.description is not distinct from old.description
+     and new.assigned_to is not distinct from old.assigned_to
+     and new.shift_id is not distinct from old.shift_id
+     and new.priority is not distinct from old.priority
+     and new.due_date is not distinct from old.due_date
+     and new.completed_at is not distinct from old.completed_at
+     and new.created_by is not distinct from old.created_by
+     and new.created_at is not distinct from old.created_at
+     and new.updated_at is not distinct from old.updated_at then
+    return new;
+  end if;
+
+  raise exception 'Personel yalnizca kendisine atanan gorevin durumunu guncelleyebilir.';
+end;
+$$;
+
+drop trigger if exists guard_task_staff_updates on public.tasks;
+create trigger guard_task_staff_updates before update on public.tasks
+for each row execute function public.guard_task_staff_updates();
+
+revoke execute on function public.guard_task_staff_updates() from public, anon, authenticated;

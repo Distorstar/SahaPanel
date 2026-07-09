@@ -54,7 +54,7 @@ export function LoginForm({ onBack }: { onBack?: () => void }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-2xl border border-line bg-surface p-6 shadow-card">
+    <form onSubmit={onSubmit} className="rounded-lg border border-line bg-surface p-6 shadow-card">
       <h2 className="text-2xl font-semibold text-ink">Giriş yap</h2>
       <p className="mt-1 text-sm text-muted">Ekip hesabınızla devam edin.</p>
 
@@ -100,7 +100,11 @@ export function LoginForm({ onBack }: { onBack?: () => void }) {
               aria-label={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
               title={showPassword ? "Şifreyi gizle" : "Şifreyi göster"}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" aria-hidden />
+              ) : (
+                <Eye className="h-4 w-4" aria-hidden />
+              )}
             </button>
           </div>
         </label>

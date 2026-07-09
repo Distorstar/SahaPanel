@@ -43,7 +43,7 @@ export function NavList({ isManager }: { isManager: boolean }) {
   const pathname = usePathname();
   const visible = useVisible(isManager);
   return (
-    <nav className="mt-8 grid gap-1">
+    <nav className="mt-7 grid gap-0.5">
       {visible.map(({ href, label, icon: Icon }) => {
         const active = isActive(pathname, href);
         return (

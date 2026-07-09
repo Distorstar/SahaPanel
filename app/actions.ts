@@ -22,7 +22,9 @@ import { getBoolean, getEnum, getString, validatePhoto } from "@/lib/validation"
 // ---------------------------------------------------------------------------
 type Session = Awaited<ReturnType<typeof getCurrentProfile>>;
 
-async function ensure(kind: "auth" | "ops" | "admin"): Promise<{ session: Session; denied: ActionResult | null }> {
+async function ensure(
+  kind: "auth" | "ops" | "admin"
+): Promise<{ session: Session; denied: ActionResult | null }> {
   const session = await getCurrentProfile();
   const role = session.profile?.role;
   if (kind === "admin" && !canManageAdmin(role)) {
@@ -64,7 +66,9 @@ async function uploadImage(
     .from(bucket)
     .upload(path, file, { upsert: false, contentType: file.type || undefined });
   if (error) return { error: "Görsel yüklenemedi: " + describeError(error) };
-  return { url: data?.path ? supabase.storage.from(bucket).getPublicUrl(data.path).data.publicUrl : undefined };
+  return {
+    url: data?.path ? supabase.storage.from(bucket).getPublicUrl(data.path).data.publicUrl : undefined
+  };
 }
 
 // Herkese acik URL'den depo icindeki obje yolunu cikar (best-effort silme icin).
@@ -80,7 +84,10 @@ function storagePathFromUrl(url: string, bucket: string): string | null {
 // ---------------------------------------------------------------------------
 export async function signOut() {
   const { supabase, user } = await getCurrentProfile();
-  await supabase.from("profiles").update({ is_online: false, last_seen_at: new Date().toISOString() }).eq("id", user.id);
+  await supabase
+    .from("profiles")
+    .update({ is_online: false, last_seen_at: new Date().toISOString() })
+    .eq("id", user.id);
   await supabase.auth.signOut();
   redirect("/login");
 }
@@ -158,11 +165,10 @@ export async function deleteAnnouncement(_: ActionResult, formData: FormData): P
   if (denied) return denied;
   const id = getString(formData, "id");
   if (!id) return fail("Kayıt bulunamadı.");
-  return attempt(
-    () => session.supabase.from("announcements").delete().eq("id", id),
-    "Duyuru silindi.",
-    ["/announcements", "/dashboard"]
-  );
+  return attempt(() => session.supabase.from("announcements").delete().eq("id", id), "Duyuru silindi.", [
+    "/announcements",
+    "/dashboard"
+  ]);
 }
 
 export async function markAnnouncementRead(_: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -263,11 +269,10 @@ export async function deleteTask(_: ActionResult, formData: FormData): Promise<A
   if (denied) return denied;
   const id = getString(formData, "id");
   if (!id) return fail("Kayıt bulunamadı.");
-  return attempt(
-    () => session.supabase.from("tasks").delete().eq("id", id),
-    "Görev silindi.",
-    ["/tasks", "/dashboard"]
-  );
+  return attempt(() => session.supabase.from("tasks").delete().eq("id", id), "Görev silindi.", [
+    "/tasks",
+    "/dashboard"
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -374,11 +379,10 @@ export async function deleteFault(_: ActionResult, formData: FormData): Promise<
     }
   }
 
-  return attempt(
-    () => session.supabase.from("faults").delete().eq("id", id),
-    "Arıza kaydı silindi.",
-    ["/faults", "/dashboard"]
-  );
+  return attempt(() => session.supabase.from("faults").delete().eq("id", id), "Arıza kaydı silindi.", [
+    "/faults",
+    "/dashboard"
+  ]);
 }
 
 // ---------------------------------------------------------------------------
@@ -447,7 +451,11 @@ export async function updateProfile(_: ActionResult, formData: FormData): Promis
   // "başarılı" mesajını önlüyoruz.)
   if (!canManageAdmin(session.profile?.role)) {
     if (role === "admin") return fail("Admin rolünü yalnızca admin atayabilir.");
-    const { data: target } = await session.supabase.from("profiles").select("role").eq("id", id).maybeSingle();
+    const { data: target } = await session.supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", id)
+      .maybeSingle();
     if (target?.role === "admin") return fail("Bir yöneticiyi yalnızca admin düzenleyebilir.");
   }
 
@@ -477,7 +485,11 @@ export async function updateProfileActive(_: ActionResult, formData: FormData): 
 
   // Admin olmayan yetkili, bir admin'in aktiflik durumunu değiştiremez.
   if (!canManageAdmin(session.profile?.role)) {
-    const { data: target } = await session.supabase.from("profiles").select("role").eq("id", id).maybeSingle();
+    const { data: target } = await session.supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", id)
+      .maybeSingle();
     if (target?.role === "admin") return fail("Bir yöneticinin durumunu yalnızca admin değiştirebilir.");
   }
 
@@ -554,7 +566,9 @@ export async function approveRegistration(_: ActionResult, formData: FormData): 
       ["/registrations", "/personnel", "/admin", "/dashboard"].forEach((path) => revalidatePath(path));
       return ok(
         "Kayıt onaylandı, ancak e-posta doğrulaması otomatik uygulanamadı; personel giriş yapamayabilir. " +
-          "SUPABASE_SECRET_KEY ortam değişkeninin tanımlı olduğundan emin olun. (" + confirmError + ")"
+          "SUPABASE_SECRET_KEY ortam değişkeninin tanımlı olduğundan emin olun. (" +
+          confirmError +
+          ")"
       );
     }
   } catch (error) {
@@ -608,11 +622,10 @@ export async function createDepartment(_: ActionResult, formData: FormData): Pro
   if (denied) return denied;
   const name = getString(formData, "name");
   if (!name) return fail("Departman adı zorunludur.", { name: "Departman adı zorunludur." });
-  return attempt(
-    () => session.supabase.from("departments").insert({ name }),
-    "Departman eklendi.",
-    ["/admin", "/personnel"]
-  );
+  return attempt(() => session.supabase.from("departments").insert({ name }), "Departman eklendi.", [
+    "/admin",
+    "/personnel"
+  ]);
 }
 
 export async function updateDepartment(_: ActionResult, formData: FormData): Promise<ActionResult> {
@@ -633,9 +646,8 @@ export async function deleteDepartment(_: ActionResult, formData: FormData): Pro
   if (denied) return denied;
   const id = getString(formData, "id");
   if (!id) return fail("Kayıt bulunamadı.");
-  return attempt(
-    () => session.supabase.from("departments").delete().eq("id", id),
-    "Departman silindi.",
-    ["/admin", "/personnel"]
-  );
+  return attempt(() => session.supabase.from("departments").delete().eq("id", id), "Departman silindi.", [
+    "/admin",
+    "/personnel"
+  ]);
 }

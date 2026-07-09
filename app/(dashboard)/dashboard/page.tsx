@@ -1,8 +1,11 @@
 import Link from "next/link";
 import {
+  Activity,
+  ArrowRight,
   Bell,
   CalendarDays,
   CheckCircle2,
+  Clock3,
   ClipboardList,
   Gauge,
   ShieldCheck,
@@ -81,10 +84,7 @@ export default async function DashboardPage() {
     supabase.from("tasks").select("*", { count: "exact", head: true }).neq("status", "Tamamlandi"),
     supabase.from("faults").select("*", { count: "exact", head: true }).neq("status", "Cozuldu"),
     supabase.from("announcements").select("*", { count: "exact", head: true }),
-    supabase
-      .from("announcement_reads")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id),
+    supabase.from("announcement_reads").select("*", { count: "exact", head: true }).eq("user_id", user.id),
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase
       .from("shifts")
@@ -94,7 +94,9 @@ export default async function DashboardPage() {
       .limit(6),
     supabase
       .from("tasks")
-      .select("id, status, priority, due_date, title, assigned_to, assignee:profiles!tasks_assigned_to_fkey(full_name)"),
+      .select(
+        "id, status, priority, due_date, title, assigned_to, assignee:profiles!tasks_assigned_to_fkey(full_name)"
+      ),
     supabase.from("faults").select("id, status, severity, category"),
     supabase
       .from("announcements")
@@ -158,14 +160,91 @@ export default async function DashboardPage() {
     : canManage
       ? "Takım lideri olarak duyuru, görev ve arıza akışlarını yönetebilir, ekibi yönlendirebilirsiniz."
       : "Duyuruları okuyabilir, size atanan görevleri takip edebilir ve arıza bildirimi oluşturabilirsiniz.";
+  const attentionCount = overdueTasks.length + (openFaultCount ?? 0) + unreadAnnouncementCount;
+  const attentionItems = [
+    {
+      label: "Geciken görev",
+      value: overdueTasks.length,
+      hint: overdueTasks.length ? "Hemen takip edilmeli" : "Temiz",
+      href: "/tasks",
+      icon: Clock3
+    },
+    {
+      label: "Açık arıza",
+      value: openFaultCount ?? 0,
+      hint: openFaultCount ? "Çözüm bekliyor" : "Açık kayıt yok",
+      href: "/faults",
+      icon: Siren
+    },
+    {
+      label: "Okunmamış duyuru",
+      value: unreadAnnouncementCount,
+      hint: unreadAnnouncementCount ? "Ekip bilgisi var" : "Tümü okundu",
+      href: "/announcements",
+      icon: Bell
+    }
+  ];
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-5">
       <PageHeader
         icon={Gauge}
         title={firstName ? `${greeting()}, ${firstName}` : greeting()}
         description="Saha operasyonunun güncel özetine göz atın; görev, arıza, vardiya ve duyurular tek bakışta."
       />
+
+      <Panel className="overflow-hidden p-0">
+        <div className="grid lg:grid-cols-[0.95fr_2fr]">
+          <div className="border-b border-line p-4 lg:border-b-0 lg:border-r">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase text-muted-2">Operasyon özeti</p>
+                <h2 className="mt-1 text-xl font-semibold text-ink">Bugünün saha nabzı</h2>
+              </div>
+              <Badge tone={attentionCount ? "red" : "green"} dot>
+                {attentionCount ? `${attentionCount} takip` : "Sakin"}
+              </Badge>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-2">Çevrimiçi</p>
+                <p className="mt-1 inline-flex items-center gap-1 font-semibold text-ink">
+                  <Activity className="h-4 w-4 text-brand-600" aria-hidden />
+                  {onlinePeople.length} personel
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-2">Aktif ekip</p>
+                <p className="mt-1 inline-flex items-center gap-1 font-semibold text-ink">
+                  <Users className="h-4 w-4 text-brand-600" aria-hidden />
+                  {activePersonnelCount ?? 0} kişi
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="divide-y divide-line sm:grid sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {attentionItems.map(({ label, value, hint, href, icon: Icon }) => (
+              <Link
+                key={label}
+                href={href}
+                className="focus-ring flex min-h-28 items-center justify-between gap-3 p-4 transition hover:bg-surface-2"
+              >
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase text-muted-2">{label}</p>
+                  <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{value}</p>
+                  <p className="mt-1 truncate text-xs text-muted-2">{hint}</p>
+                </div>
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-md bg-surface-2 text-muted">
+                  <Icon className="h-5 w-5" aria-hidden />
+                </span>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-2" aria-hidden />
+                <span className="sr-only">{label} sayfasına git</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </Panel>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -208,7 +287,7 @@ export default async function DashboardPage() {
         faultCategory={faultCategoryItems}
       />
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel>
           <SectionTitle
             title="Geciken görevler"
@@ -262,7 +341,8 @@ export default async function DashboardPage() {
                   <div className="min-w-0">
                     <p className="truncate font-medium text-ink">{shift.profiles?.full_name ?? "Personel"}</p>
                     <p className="mt-0.5 text-xs text-muted-2">
-                      {formatDate(shift.shift_date)} · {formatTime(shift.starts_at)}–{formatTime(shift.ends_at)}
+                      {formatDate(shift.shift_date)} · {formatTime(shift.starts_at)}–
+                      {formatTime(shift.ends_at)}
                     </p>
                   </div>
                   <Badge tone={shift.is_leave ? "amber" : "green"}>
@@ -323,7 +403,7 @@ export default async function DashboardPage() {
         )}
       </Panel>
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
         <Panel>
           <SectionTitle
             title="Son duyurular"

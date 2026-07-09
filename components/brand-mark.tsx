@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 // bekleme ekraninda ayni bilesen kullanilir. Sunucu/istemci her yerde calisir.
 const sizeMap = {
   sm: "h-9 w-9 rounded-lg text-xs",
-  md: "h-10 w-10 rounded-xl text-sm",
-  lg: "h-14 w-14 rounded-2xl text-xl"
+  md: "h-10 w-10 rounded-lg text-sm",
+  lg: "h-14 w-14 rounded-lg text-xl"
 } as const;
 
 export function BrandMark({ size = "md", className }: { size?: keyof typeof sizeMap; className?: string }) {

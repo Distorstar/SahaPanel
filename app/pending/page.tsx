@@ -17,7 +17,7 @@ export default async function PendingPage() {
   return (
     <main className="grid min-h-screen place-items-center bg-canvas px-6 py-10">
       <ThemeToggle className="absolute right-4 top-4" />
-      <div className="w-full max-w-md rounded-xl border border-line bg-surface p-8 text-center shadow-card">
+      <div className="w-full max-w-md rounded-lg border border-line bg-surface p-8 text-center shadow-card">
         <div className="mb-3 flex items-center justify-center gap-3">
           <BrandMark size="md" />
           <div className="text-left">

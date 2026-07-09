@@ -37,13 +37,22 @@ html {
 body {
   margin: 0;
   font-family:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif;
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    "Noto Sans",
+    sans-serif;
   background: rgb(var(--canvas));
   color: rgb(var(--ink));
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 button,
@@ -57,12 +66,8 @@ textarea {
   @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas;
 }
 
-/* Koyu temada zemine hafif derinlik veren radyal isik */
 .dark body {
-  background-image:
-    radial-gradient(1100px 620px at 82% -12%, rgba(178, 59, 55, 0.14), transparent 58%),
-    radial-gradient(900px 520px at -8% 108%, rgba(212, 175, 55, 0.06), transparent 55%);
-  background-attachment: fixed;
+  background: rgb(var(--canvas));
 }
 
 /* Ince altin ayrac cizgisi (kurumsal detay) */

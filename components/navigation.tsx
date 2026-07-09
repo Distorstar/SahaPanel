@@ -18,7 +18,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-canvas">
       <PresenceHeartbeat />
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 flex-col border-r border-line bg-surface px-4 py-5 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-surface px-3 py-4 lg:flex">
         <Brand />
         <div className="flex-1 overflow-y-auto">
           <NavList isManager={isManager} />
@@ -52,7 +52,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      <main className="px-4 pb-24 pt-5 lg:ml-72 lg:px-8 lg:pb-8">
+      <main className="px-4 pb-24 pt-5 lg:ml-64 lg:px-6 lg:pb-8">
         <div className="mx-auto max-w-7xl">{children}</div>
       </main>
 

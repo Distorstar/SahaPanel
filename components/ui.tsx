@@ -66,7 +66,7 @@ export function PageHeader({
 // ---------------------------------------------------------------------------
 export function Panel({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <section className={cn("rounded-xl border border-line bg-surface p-4 shadow-card", className)}>
+    <section className={cn("rounded-lg border border-line bg-surface p-4 shadow-card", className)}>
       {children}
     </section>
   );
@@ -180,21 +180,21 @@ export function StatCard({
   href?: string;
 }) {
   const inner = (
-    <Panel className={cn("h-full transition", href && "hover:border-brand-200 hover:shadow-panel")}>
-      <div className="flex items-center justify-between gap-3">
+    <Panel className={cn("h-full p-3.5 transition", href && "hover:border-brand-200 hover:shadow-panel")}>
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm text-muted">{label}</p>
-          <p className="mt-2 text-3xl font-semibold text-ink">{value}</p>
+          <p className="text-xs font-semibold uppercase text-muted-2">{label}</p>
+          <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{value}</p>
           {hint ? <p className="mt-1 truncate text-xs text-muted-2">{hint}</p> : null}
         </div>
-        <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-lg", toneClasses[tone])}>
+        <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-md", toneClasses[tone])}>
           <Icon className="h-5 w-5" aria-hidden />
         </span>
       </div>
     </Panel>
   );
   return href ? (
-    <Link href={href} className="focus-ring block rounded-xl">
+    <Link href={href} className="focus-ring block rounded-lg">
       {inner}
     </Link>
   ) : (
@@ -217,7 +217,7 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="grid place-items-center rounded-xl border border-dashed border-line bg-surface-2/50 px-6 py-12 text-center">
+    <div className="grid place-items-center rounded-lg border border-dashed border-line bg-surface-2/50 px-6 py-12 text-center">
       {Icon ? (
         <span className="mb-3 grid h-12 w-12 place-items-center rounded-full bg-surface text-muted-2 shadow-sm">
           <Icon className="h-6 w-6" aria-hidden />
@@ -258,8 +258,17 @@ export function Avatar({ name, size = "md" }: { name?: string | null; size?: "sm
 export function ProgressBar({ value, max, tone = "green" }: { value: number; max: number; tone?: Tone }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
-    <div className="h-2 w-full overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-      <div className={cn("h-full rounded-full transition-all", dotClasses[tone])} style={{ width: `${pct}%` }} />
+    <div
+      className="h-2 w-full overflow-hidden rounded-full bg-surface-2"
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
+      <div
+        className={cn("h-full rounded-full transition-all", dotClasses[tone])}
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

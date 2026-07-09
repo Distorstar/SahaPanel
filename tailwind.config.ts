@@ -48,10 +48,10 @@ const config: Config = {
         }
       },
       boxShadow: {
-        panel: "0 18px 50px rgba(0, 0, 0, 0.35)",
-        card: "0 1px 2px rgba(0, 0, 0, 0.28), 0 2px 8px rgba(0, 0, 0, 0.22)",
-        pop: "0 16px 40px rgba(0, 0, 0, 0.45)",
-        glow: "0 0 0 1px rgba(178, 59, 55, 0.35), 0 20px 60px rgba(0, 0, 0, 0.55)"
+        panel: "0 14px 34px rgba(15, 23, 42, 0.12)",
+        card: "0 1px 2px rgba(15, 23, 42, 0.08)",
+        pop: "0 18px 42px rgba(15, 23, 42, 0.22)",
+        glow: "0 0 0 1px rgba(178, 59, 55, 0.28), 0 16px 38px rgba(15, 23, 42, 0.18)"
       },
       keyframes: {
         "toast-in": {

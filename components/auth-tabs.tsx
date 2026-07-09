@@ -27,7 +27,7 @@ export function AuthTabs({ departments, mode = "login" }: { departments: Departm
         <button
           type="button"
           onClick={() => go("login")}
-          className="focus-ring group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 text-sm font-semibold text-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-500 hover:shadow-glow active:translate-y-0"
+          className="focus-ring group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white shadow-card transition-all duration-200 hover:bg-brand-500 hover:shadow-glow"
         >
           <LogIn className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
           Giriş Yap
@@ -35,9 +35,12 @@ export function AuthTabs({ departments, mode = "login" }: { departments: Departm
         <button
           type="button"
           onClick={() => go("register")}
-          className="focus-ring group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-400/50 hover:bg-surface-2 active:translate-y-0"
+          className="focus-ring group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 text-sm font-semibold text-ink transition-all duration-200 hover:border-gold-400/50 hover:bg-surface-2"
         >
-          <UserPlus className="h-4 w-4 text-gold-400 transition-transform group-hover:scale-110" aria-hidden />
+          <UserPlus
+            className="h-4 w-4 text-gold-400 transition-transform group-hover:scale-110"
+            aria-hidden
+          />
           Kayıt Ol
         </button>
       </div>
